@@ -1,0 +1,3 @@
+[console_scripts]
+updb = updb:run
+
