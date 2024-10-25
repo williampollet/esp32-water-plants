@@ -11,13 +11,17 @@ def start_web_server(ap: network.WLAN, wifi: network.WLAN):
     s.listen(1)
     print("Web server is running on http://192.168.4.1")
     
+    response = ""
     while True:
         cl, addr = s.accept()
         print("Client connected from", addr)
         
         request = cl.recv(1024)
         print("Request:", request)
-        
+        if response == "<h2>WiFi credentials received. Connecting...</h2>":
+            time.sleep(0.2)
+            break
+
         # Check if the client is requesting the form submission
         if "POST /connect" in request:
             try:
@@ -27,14 +31,13 @@ def start_web_server(ap: network.WLAN, wifi: network.WLAN):
                 creds = {c.split('=')[0]: c.split('=')[1] for c in data.split('&')}
                 ssid = creds["ssid"]
                 password = creds["password"]
-                
+
                 # Store the credentials and try connecting
                 save_credentials(ssid, password)
-                response = "<h2>WiFi credentials received. Attempting to connect...</h2>"
+                response = "<h2>WiFi credentials received. Connecting...</h2>"
                 connect_to_wifi(ap=ap, wifi=wifi)
             except Exception as e:
-                raise e
-                # response = "<h2>Error processing credentials.</h2>"
+                response = "<h2>Error processing credentials.</h2>"
         else:
             # Serve the HTML form to enter WiFi credentials
             response = """\
@@ -84,7 +87,6 @@ def connect_to_wifi(ap: network.WLAN, wifi: network.WLAN):
             if wifi.isconnected():
                 print("Connected to WiFi:", ssid)
                 print("IP Address:", wifi.ifconfig()[0])
-                ap.active(False)  # Turn off AP mode after connecting
                 return True
             time.sleep(1)
         

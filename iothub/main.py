@@ -16,8 +16,8 @@ from pumps import PumpConfig
 
 ap = network.WLAN(network.AP_IF)
 wifi = network.WLAN(network.STA_IF)
-ap.config(essid="ESP32-Setup", authmode=network.AUTH_WPA_WPA2_PSK, password="password123")
 ap.active(True)
+ap.config(essid="ESP32-Setup", authmode=network.AUTH_WPA_WPA2_PSK, password="password123")
 
 #####################################################
 # WiFi connect
@@ -25,6 +25,8 @@ ap.active(True)
 if not connect_to_wifi(ap=ap, wifi=wifi):
     print("Failed to auto-connect. Starting AP mode for manual setup.")
     start_web_server(ap=ap, wifi=wifi)
+
+ap.active(False)  # Turn off AP mode after connecting
 
 #####################################################
 # MQTT Configuration
